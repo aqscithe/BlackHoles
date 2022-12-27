@@ -30,6 +30,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void SetInputMappings();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -55,6 +57,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	const UInputAction* LookAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	const UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float ForwardBackSpeed = 200.f;

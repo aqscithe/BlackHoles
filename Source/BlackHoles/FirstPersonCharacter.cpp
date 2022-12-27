@@ -18,7 +18,6 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	Camera->SetupAttachment(RootComponent);
 	Camera->bUsePawnControlRotation = true;
 
-
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawn"));
 	ProjectileSpawnPoint->SetupAttachment(RootComponent);
 
@@ -30,6 +29,12 @@ void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetInputMappings();
+
+}
+
+void AFirstPersonCharacter::SetInputMappings()
+{
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -40,9 +45,6 @@ void AFirstPersonCharacter::BeginPlay()
 			}
 		}
 	}
-
-	
-	
 }
 
 // Called every frame
@@ -61,6 +63,7 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	{
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::Look);
+		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::Jump);
 	}
 }
 
@@ -79,9 +82,6 @@ void AFirstPersonCharacter::Move(const FInputActionValue& Value)
 
 	const FVector SideDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 	AddMovementInput(SideDirection, MovementVector.X);
-
-
-	UE_LOG(LogTemp, Display, TEXT("Movement Vector: (%f, %f)"), MovementVector.X, MovementVector.Y);
 }
 
 void AFirstPersonCharacter::Look(const FInputActionValue& Value)
@@ -90,6 +90,4 @@ void AFirstPersonCharacter::Look(const FInputActionValue& Value)
 
 	AddControllerPitchInput(LookAxisVector.Y);
 	AddControllerYawInput(LookAxisVector.X);
-
-	UE_LOG(LogTemp, Display, TEXT("Look Axis Vector: (%f, %f)"), LookAxisVector.X, LookAxisVector.Y);
 }

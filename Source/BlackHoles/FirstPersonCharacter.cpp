@@ -4,9 +4,15 @@
 #include "FirstPersonCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
+#include "BlackHoleProjectile.h"
+#include "Particles/ParticleSystemComponent.h"
+
+
 
 // Sets default values
 AFirstPersonCharacter::AFirstPersonCharacter()
@@ -18,8 +24,14 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	Camera->SetupAttachment(RootComponent);
 	Camera->bUsePawnControlRotation = true;
 
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
+	SpringArm->SetupAttachment(Camera);
+
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawn"));
-	ProjectileSpawnPoint->SetupAttachment(RootComponent);
+	ProjectileSpawnPoint->SetupAttachment(SpringArm);
+
+	FormationParticles = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Formation Particles"));
+	FormationParticles->SetupAttachment(ProjectileSpawnPoint);
 
 
 }
@@ -28,6 +40,14 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//Only doing this b/c I can't see the particles details in unreal editor
+	if (FormationParticles && BHGenesisParticles)
+	{
+		FormationParticles->SetTemplate(BHGenesisParticles);
+		FormationParticles->Deactivate();
+	}
+		
 
 	SetInputMappings();
 
@@ -63,7 +83,10 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	{
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::Move);
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::Look);
-		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::Jump);
+		Input->BindAction(SummonBlackHoleAction, ETriggerEvent::Started, this, &AFirstPersonCharacter::StartSummonBlackHole);
+		Input->BindAction(SummonBlackHoleAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::LaunchBlackHole);
+		Input->BindAction(SummonBlackHoleAction, ETriggerEvent::Canceled, this, &AFirstPersonCharacter::CancelBlackHole);
+		Input->BindAction(CompressTargetAction, ETriggerEvent::Trigg, this, &AFirstPersonCharacter::CancelBlackHole);
 	}
 }
 
@@ -91,3 +114,59 @@ void AFirstPersonCharacter::Look(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisVector.Y);
 	AddControllerYawInput(LookAxisVector.X);
 }
+
+void AFirstPersonCharacter::StartSummonBlackHole(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Start Summon Black Hole Particles"));
+	UE_LOG(LogTemp, Warning, TEXT("Swirling black spheres particle effect."));
+
+	if (FormationParticles)
+		FormationParticles->Activate();
+}
+
+void AFirstPersonCharacter::LaunchBlackHole(const FInputActionValue& Value)
+{
+	if (FormationParticles)
+		FormationParticles->Deactivate();
+
+	if (BlackHoleProjectileClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Spawing and launching invisible Blackhole Mesh"));
+
+		ABlackHoleProjectile* BHProjectile = GetWorld()->SpawnActor<ABlackHoleProjectile>(
+			BlackHoleProjectileClass,
+			ProjectileSpawnPoint->GetComponentLocation(),
+			ProjectileSpawnPoint->GetComponentRotation()
+		);
+
+		if (BHProjectile)
+			BHProjectile->SetOwner(this);
+	}
+	
+}
+
+void AFirstPersonCharacter::CancelBlackHole(const FInputActionValue& Value)
+{
+	if (FormationParticles)
+		FormationParticles->Deactivate();
+
+	// play cancel black hole particle
+
+	// play cancel ability sound
+}
+
+void AFirstPersonCharacter::CompressTarget(const FInputActionValue& Value)
+{
+	// perhaps need to right click and hold ability button
+	// Mouse over compressable object/enemy in environment
+		// need crosshair
+		// need line trace
+		// outline(or some other identifying effect) for targeted object
+	// Must hold for a couple seconds
+	// object/enemy collapses in on it self and is completely destroyed
+	// a black hole is left in its wake
+	// black hole disappears after a few seconds
+}
+
+
+

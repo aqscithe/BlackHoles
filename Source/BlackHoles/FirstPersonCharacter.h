@@ -8,6 +8,9 @@
 
 
 class UInputAction;
+class ABlackHoleProjectile;
+class UParticleSystem;
+class UParticleSystemComponent;
 
 UCLASS()
 class BLACKHOLES_API AFirstPersonCharacter : public ACharacter
@@ -24,7 +27,13 @@ private:
 	class UCameraComponent* Camera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* ProjectileSpawnPoint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UParticleSystemComponent* FormationParticles;
 
 protected:
 	// Called when the game starts or when spawned
@@ -47,6 +56,18 @@ private:
 	UFUNCTION()
 	void Look(const FInputActionValue& Value);
 
+	UFUNCTION()
+	void StartSummonBlackHole(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void LaunchBlackHole(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void CancelBlackHole(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void CompressTarget(const FInputActionValue& Value);
+
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TSoftObjectPtr<class UInputMappingContext> InputMapping;
 
@@ -59,20 +80,21 @@ private:
 	const UInputAction* LookAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	const UInputAction* JumpAction;
+	const UInputAction* SummonBlackHoleAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	const UInputAction* CompressTargetAction;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float ForwardBackSpeed = 200.f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float SideSpeed = 200.f;
-	
 
-	//void MoveRight(float AxisValue);
-	//void LookRight(float AxisValue);
-	//void LookUp(float AxisValue);
-	//
-	//void LookRightRate(float AxisValue);
-	//void LookUpRate(float AxisValue);
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	TSubclassOf<ABlackHoleProjectile> BlackHoleProjectileClass;	
+
+	UPROPERTY(EditAnywhere, Category = "VFX")
+	UParticleSystem* BHGenesisParticles;
 
 };

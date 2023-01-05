@@ -48,6 +48,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void SetImmobilized(bool);
+
 private:
 
 	UFUNCTION()
@@ -66,7 +68,13 @@ private:
 	void CancelBlackHole(const FInputActionValue& Value);
 
 	UFUNCTION()
+	void StartCompressTarget(const FInputActionValue& Value);
+
+	UFUNCTION()
 	void CompressTarget(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void CancelCompressTarget(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TSoftObjectPtr<class UInputMappingContext> InputMapping;
@@ -96,5 +104,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "VFX")
 	UParticleSystem* BHGenesisParticles;
+
+	class UTargeter* Targeter;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bIsImmobilized = false;
+
 
 };

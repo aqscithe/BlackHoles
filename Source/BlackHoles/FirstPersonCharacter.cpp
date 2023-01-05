@@ -11,6 +11,7 @@
 #include "InputMappingContext.h"
 #include "BlackHoleProjectile.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Targeter.h"
 
 
 
@@ -40,6 +41,10 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Targeter = FindComponentByClass<UTargeter>();
+	if(Targeter)
+		UE_LOG(LogTemp, Warning, TEXT("Targeter Component Set Successfully"));
 
 	//Only doing this b/c I can't see the particles details in unreal editor
 	if (FormationParticles && BHGenesisParticles)
@@ -86,7 +91,9 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		Input->BindAction(SummonBlackHoleAction, ETriggerEvent::Started, this, &AFirstPersonCharacter::StartSummonBlackHole);
 		Input->BindAction(SummonBlackHoleAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::LaunchBlackHole);
 		Input->BindAction(SummonBlackHoleAction, ETriggerEvent::Canceled, this, &AFirstPersonCharacter::CancelBlackHole);
-		Input->BindAction(CompressTargetAction, ETriggerEvent::Trigg, this, &AFirstPersonCharacter::CancelBlackHole);
+		Input->BindAction(CompressTargetAction, ETriggerEvent::Started, this, &AFirstPersonCharacter::StartCompressTarget);
+		Input->BindAction(CompressTargetAction, ETriggerEvent::Triggered, this, &AFirstPersonCharacter::CompressTarget);
+		Input->BindAction(CompressTargetAction, ETriggerEvent::Canceled, this, &AFirstPersonCharacter::CancelCompressTarget);
 	}
 }
 
@@ -94,6 +101,8 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 // Use FInputActionValue if that is all you need
 void AFirstPersonCharacter::Move(const FInputActionValue& Value)
 {
+	if (bIsImmobilized) return;
+
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	const FRotator Rotation = GetController()->GetControlRotation();
@@ -109,6 +118,8 @@ void AFirstPersonCharacter::Move(const FInputActionValue& Value)
 
 void AFirstPersonCharacter::Look(const FInputActionValue& Value)
 {
+	if (bIsImmobilized) return;
+
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	AddControllerPitchInput(LookAxisVector.Y);
@@ -117,6 +128,8 @@ void AFirstPersonCharacter::Look(const FInputActionValue& Value)
 
 void AFirstPersonCharacter::StartSummonBlackHole(const FInputActionValue& Value)
 {
+	if (bIsImmobilized) return;
+
 	UE_LOG(LogTemp, Warning, TEXT("Start Summon Black Hole Particles"));
 	UE_LOG(LogTemp, Warning, TEXT("Swirling black spheres particle effect."));
 
@@ -126,6 +139,8 @@ void AFirstPersonCharacter::StartSummonBlackHole(const FInputActionValue& Value)
 
 void AFirstPersonCharacter::LaunchBlackHole(const FInputActionValue& Value)
 {
+	if (bIsImmobilized) return;
+
 	if (FormationParticles)
 		FormationParticles->Deactivate();
 
@@ -155,17 +170,50 @@ void AFirstPersonCharacter::CancelBlackHole(const FInputActionValue& Value)
 	// play cancel ability sound
 }
 
+void AFirstPersonCharacter::StartCompressTarget(const FInputActionValue& Value)
+{
+	if (bIsImmobilized) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("START Compress Target"));
+	Targeter->Target();
+
+}
+
 void AFirstPersonCharacter::CompressTarget(const FInputActionValue& Value)
 {
-	// perhaps need to right click and hold ability button
+
+	UE_LOG(LogTemp, Warning, TEXT("TRIGGER Compress Target"));
+	// perhaps need to right click and hold ability button [CHECK]
+		// HOLD Input Action [CHECK]
+		// Trigger once Hold Time Threshold is reached [CHECK]
 	// Mouse over compressable object/enemy in environment
-		// need crosshair
-		// need line trace
+		// need crosshair [CHECK]
+		// Targeter Component [CHECK]
+		// need line trace [CHECK]
+		// need trace channel [CHECK]
 		// outline(or some other identifying effect) for targeted object
 	// Must hold for a couple seconds
+	// PlayerCharacter can not move while casting this ability(immobilize self)
+
 	// object/enemy collapses in on it self and is completely destroyed
+	
+	UE_LOG(LogTemp, Warning, TEXT("Target Released Post Collapse"));
+
+	// Player can move again
+	Targeter->Release();
+
 	// a black hole is left in its wake
 	// black hole disappears after a few seconds
+}
+
+void AFirstPersonCharacter::CancelCompressTarget(const FInputActionValue& Value)
+{
+	Targeter->Release();
+}
+
+void AFirstPersonCharacter::SetImmobilized(bool bImmobile)
+{
+	bIsImmobilized = bImmobile;
 }
 
 

@@ -38,8 +38,10 @@ void UTargeter::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	//
 	//if (PhysicsHandle && PhysicsHandle->GetGrabbedComponent())
 	//{
-	//	FVector TargetLocation = GetComponentLocation() + GetForwardVector() * HoldDistance;
-	//	PhysicsHandle->SetTargetLocationAndRotation(TargetLocation, GetComponentRotation());
+	//	if (AActor* TargetedActor = PhysicsHandle->GetGrabbedComponent()->GetOwner())
+	//	{
+	//		// shake object
+	//	}
 	//}
 }
 
@@ -86,6 +88,11 @@ void UTargeter::Target()
 				Target.ImpactPoint,
 				GetComponentRotation()
 			);
+
+			// Add shake scene component to actor
+			Actor->AddComponentByClass(ShakeClass, false, FTransform::Identity, false);
+
+			// need to still remove the component in the release function
 			
 			TargetedActorTags.Add("Targeted");
 			UE_LOG(LogTemp, Display, TEXT("Number of tags POST TARGET: %d"), TargetedActorTags.Num());
@@ -139,7 +146,6 @@ void UTargeter::Release()
 			OwnerPlayerChar->SetImmobilized(false);
 		}
 			
-
 		PhysicsHandle->GetGrabbedComponent()->WakeAllRigidBodies();
 		PhysicsHandle->GetGrabbedComponent()->GetOwner()->Tags.Remove("Targeted");
 		PhysicsHandle->ReleaseComponent();

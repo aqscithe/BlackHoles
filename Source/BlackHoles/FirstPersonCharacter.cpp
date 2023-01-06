@@ -183,19 +183,16 @@ void AFirstPersonCharacter::CompressTarget(const FInputActionValue& Value)
 {
 
 	UE_LOG(LogTemp, Warning, TEXT("TRIGGER Compress Target"));
-	// perhaps need to right click and hold ability button [CHECK]
-		// HOLD Input Action [CHECK]
-		// Trigger once Hold Time Threshold is reached [CHECK]
-	// Mouse over compressable object/enemy in environment
-		// need crosshair [CHECK]
-		// Targeter Component [CHECK]
-		// need line trace [CHECK]
-		// need trace channel [CHECK]
-		// outline(or some other identifying effect) for targeted object
-	// Must hold for a couple seconds
-	// PlayerCharacter can not move while casting this ability(immobilize self)
+
+	// outline(or some other identifying effect) for targeted object
 
 	// object/enemy collapses in on it self and is completely destroyed
+		// enemy should quake and vibrate before collapsing
+		// perhaps their mesh scales down slightly
+		// need to add an implosion effect where mesh vertices collapse towards a single central point
+			// possibly using chaos engine and/or radial forces
+	
+	// Add camera shake effect while holding this ability
 	
 	UE_LOG(LogTemp, Warning, TEXT("Target Released Post Collapse"));
 

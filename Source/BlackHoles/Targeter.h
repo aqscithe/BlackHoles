@@ -35,6 +35,10 @@ private:
 	bool GetTargetableInReach(FHitResult& OutHit) const;
 
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<UActorComponent> ShakeClass;
+
+
+	UPROPERTY(EditAnywhere)
 	float MaxTargetDist = 400.f;
 
 	UPROPERTY(EditAnywhere)

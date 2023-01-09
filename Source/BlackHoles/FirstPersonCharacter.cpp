@@ -28,6 +28,9 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
 	SpringArm->SetupAttachment(Camera);
 
+	Targeter = CreateDefaultSubobject<UTargeter>(TEXT("Targeter Component"));
+	Targeter->SetupAttachment(Camera);
+
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Projectile Spawn"));
 	ProjectileSpawnPoint->SetupAttachment(SpringArm);
 
@@ -42,9 +45,9 @@ void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Targeter = FindComponentByClass<UTargeter>();
-	if(Targeter)
-		UE_LOG(LogTemp, Warning, TEXT("Targeter Component Set Successfully"));
+	//Targeter = FindComponentByClass<UTargeter>();
+	//if(Targeter)
+	//	UE_LOG(LogTemp, Warning, TEXT("Targeter Component Set Successfully"));
 
 	//Only doing this b/c I can't see the particles details in unreal editor
 	if (FormationParticles && BHGenesisParticles)
@@ -185,23 +188,14 @@ void AFirstPersonCharacter::CompressTarget(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Warning, TEXT("TRIGGER Compress Target"));
 
 	// outline(or some other identifying effect) for targeted object
-
-	// object/enemy collapses in on it self and is completely destroyed
-		// enemy should quake and vibrate before collapsing
-		// perhaps their mesh scales down slightly
-		// need to add an implosion effect where mesh vertices collapse towards a single central point
-			// possibly using chaos engine and/or radial forces
-	
 	// Add camera shake effect while holding this ability
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("Target Released Post Collapse"));
 
 	// Player can move again
-	Targeter->Release();
-
-	// a black hole is left in its wake
-	// black hole disappears after a few seconds
+	Targeter->Release(true);
 }
+
 
 void AFirstPersonCharacter::CancelCompressTarget(const FInputActionValue& Value)
 {

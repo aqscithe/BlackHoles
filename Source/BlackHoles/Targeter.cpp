@@ -34,15 +34,6 @@ void UTargeter::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	//
-	//if (PhysicsHandle && PhysicsHandle->GetGrabbedComponent())
-	//{
-	//	if (AActor* TargetedActor = PhysicsHandle->GetGrabbedComponent()->GetOwner())
-	//	{
-	//		// shake object
-	//	}
-	//}
 }
 
 UPhysicsHandleComponent* UTargeter::GetPhysicsHandle()
@@ -70,10 +61,10 @@ void UTargeter::Target()
 
 	if (HasTarget)
 	{
-		AActor* Actor = Target.GetActor();
+		TargetedActor = Target.GetActor();
 		UPrimitiveComponent* TargetedComponent = Target.GetComponent();
 
-		TArray<FName>& TargetedActorTags = Actor->Tags;
+		TArray<FName>& TargetedActorTags = TargetedActor->Tags;
 		UE_LOG(LogTemp, Display, TEXT("Number of tags on grabbed actor: %d"), TargetedActorTags.Num());
 
 		if (!TargetedActorTags.Contains("Targeted"))
@@ -90,16 +81,15 @@ void UTargeter::Target()
 			);
 
 			// Add shake scene component to actor
-			Actor->AddComponentByClass(ShakeClass, false, FTransform::Identity, false);
+			TargetedActor->AddComponentByClass(ShakeClass, false, FTransform::Identity, false);
 
-			// need to still remove the component in the release function
 			
 			TargetedActorTags.Add("Targeted");
 			UE_LOG(LogTemp, Display, TEXT("Number of tags POST TARGET: %d"), TargetedActorTags.Num());
 		}
 		else
 		{
-			UE_LOG(LogTemp, Display, TEXT("%s already targeted"), *Actor->GetActorLabel());
+			UE_LOG(LogTemp, Display, TEXT("%s already targeted"), *TargetedActor->GetActorLabel());
 		}
 	}
 	else
@@ -129,7 +119,7 @@ bool UTargeter::GetTargetableInReach(FHitResult& OutHit) const
 }
 
 
-void UTargeter::Release()
+void UTargeter::Release(bool bBlackHoleIsTriggered)
 {
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
 
@@ -145,10 +135,36 @@ void UTargeter::Release()
 			UE_LOG(LogTemp, Display, TEXT("Release Function owner player char check"));
 			OwnerPlayerChar->SetImmobilized(false);
 		}
+
+		if (UPrimitiveComponent* GrabbedComponent = PhysicsHandle->GetGrabbedComponent())
+		{
+			if (bBlackHoleIsTriggered)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Spawning BH Sphere"));
+
+				GetWorld()->SpawnActor<AActor>(
+					BHOriginClass,
+					GrabbedComponent->GetCenterOfMass(),
+					GrabbedComponent->GetOwner()->GetActorRotation()
+				);
+
+			}
 			
-		PhysicsHandle->GetGrabbedComponent()->WakeAllRigidBodies();
-		PhysicsHandle->GetGrabbedComponent()->GetOwner()->Tags.Remove("Targeted");
-		PhysicsHandle->ReleaseComponent();
+
+			GrabbedComponent->WakeAllRigidBodies();
+
+			if (!GrabbedComponent->GetOwner()) return;
+			GrabbedComponent->GetOwner()->Tags.Remove("Targeted");
+
+			if (!ShakeClass) return;
+			GrabbedComponent->GetOwner()->GetComponentByClass(ShakeClass)->DestroyComponent();
+
+			PhysicsHandle->ReleaseComponent();
+			TargetedActor = nullptr;
+			UE_LOG(LogTemp, Display, TEXT("Released Component"));
+		}
+
+			
 
 	}
 	else

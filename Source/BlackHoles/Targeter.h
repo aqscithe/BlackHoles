@@ -26,7 +26,7 @@ public:
 
 	void Target();
 
-	void Release();
+	void Release(bool bBlackHoleIsTriggered = false);
 
 private:
 
@@ -34,8 +34,13 @@ private:
 
 	bool GetTargetableInReach(FHitResult& OutHit) const;
 
+	AActor* TargetedActor;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UActorComponent> ShakeClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	TSubclassOf<AActor> BHOriginClass;
 
 
 	UPROPERTY(EditAnywhere)

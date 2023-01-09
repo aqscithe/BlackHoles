@@ -35,6 +35,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UParticleSystemComponent* FormationParticles;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class UTargeter* Targeter;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -105,7 +108,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "VFX")
 	UParticleSystem* BHGenesisParticles;
 
-	class UTargeter* Targeter;
+	
 
 	UPROPERTY(VisibleAnywhere)
 	bool bIsImmobilized = false;

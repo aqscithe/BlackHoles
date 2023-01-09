@@ -6,21 +6,29 @@
 #include "GameFramework/Actor.h"
 #include "BlackHoleBase.generated.h"
 
-UCLASS()
-class BLACKHOLES_API ABlackHoleBase : public AActor
+
+UINTERFACE(MinimalAPI, Blueprintable)
+class UBlackHoleInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+
+class IBlackHoleInterface
 {
 	GENERATED_BODY()
 	
-public:	
-	// Sets default values for this actor's properties
-	ABlackHoleBase();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void DestroySelf();
+
+protected:
+
+	UPROPERTY(EditAnywhere, Category = "FX")
+	class USoundBase* PersistentSound;
+
+	UPROPERTY(EditAnywhere)
+	float SelfDestroyTimer = 5.f;
 
 };

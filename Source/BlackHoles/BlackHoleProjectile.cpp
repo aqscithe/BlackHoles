@@ -56,3 +56,8 @@ void ABlackHoleProjectile::DestroyBH()
 {
 	Destroy();
 }
+
+void ABlackHoleProjectile::DestroySelf()
+{
+	Destroy();
+}

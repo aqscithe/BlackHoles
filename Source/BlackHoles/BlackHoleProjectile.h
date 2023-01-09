@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Projectile.h"
+#include "BlackHoleBase.h"
 #include "BlackHoleProjectile.generated.h"
 
 class UParticleSystemComponent;
@@ -12,7 +13,7 @@ class UParticleSystemComponent;
  * 
  */
 UCLASS()
-class BLACKHOLES_API ABlackHoleProjectile : public AProjectile
+class BLACKHOLES_API ABlackHoleProjectile : public AProjectile, public IBlackHoleInterface
 {
 	GENERATED_BODY()
 
@@ -34,9 +35,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "FX")
 	UParticleSystem* TractionFX;
 
-	UPROPERTY(EditAnywhere, Category = "FX")
-	class USoundBase* PersistentSound;
-
 
 protected:
 	// Called when the game starts or when spawned
@@ -44,6 +42,14 @@ protected:
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult) override;
+
+	void DestroySelf() override;
+
+	UPROPERTY(EditAnywhere, Category = "FX")
+		class USoundBase* PersistentSound;
+
+	UPROPERTY(EditAnywhere)
+		float SelfDestroyTimer = 5.f;
 	
 private:	
 
@@ -53,4 +59,6 @@ private:
 	float BlackHoleDestructionTimer = 5.f;
 
 	FTimerHandle BlackHoleDestructionTimerHandle;
+
+	
 };

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "BlackHoleBase.generated.h"
+#include "BlackHoleInterface.generated.h"
 
 
 UINTERFACE(MinimalAPI, Blueprintable)

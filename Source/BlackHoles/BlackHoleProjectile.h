@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Projectile.h"
-#include "BlackHoleBase.h"
+#include "BlackHoleInterface.h"
 #include "BlackHoleProjectile.generated.h"
 
 class UParticleSystemComponent;

@@ -6,6 +6,8 @@
 #include "Components/SceneComponent.h"
 #include "Targeter.generated.h"
 
+class UPhysicsHandleComponent;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLACKHOLES_API UTargeter : public USceneComponent
@@ -16,23 +18,7 @@ public:
 	// Sets default values for this component's properties
 	UTargeter();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	void Target();
-
-	void Release(bool bBlackHoleIsTriggered = false);
-
 private:
-
-	class UPhysicsHandleComponent* GetPhysicsHandle();
-
-	bool GetTargetableInReach(FHitResult& OutHit) const;
 
 	AActor* TargetedActor;
 
@@ -51,4 +37,24 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float HoldDistance = 200.f;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+public:	
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	void Target();
+
+	void Release(bool bBlackHoleIsTriggered = false);
+
+private:
+
+	UPhysicsHandleComponent* GetPhysicsHandle();
+
+	bool GetTargetableInReach(FHitResult& OutHit) const;
+
+	
 };

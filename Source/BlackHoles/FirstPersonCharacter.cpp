@@ -45,10 +45,6 @@ void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Targeter = FindComponentByClass<UTargeter>();
-	//if(Targeter)
-	//	UE_LOG(LogTemp, Warning, TEXT("Targeter Component Set Successfully"));
-
 	//Only doing this b/c I can't see the particles details in unreal editor
 	if (FormationParticles && BHGenesisParticles)
 	{
@@ -56,7 +52,6 @@ void AFirstPersonCharacter::BeginPlay()
 		FormationParticles->Deactivate();
 	}
 		
-
 	SetInputMappings();
 
 }
@@ -110,7 +105,6 @@ void AFirstPersonCharacter::Move(const FInputActionValue& Value)
 
 	const FRotator Rotation = GetController()->GetControlRotation();
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-
 
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	AddMovementInput(ForwardDirection, MovementVector.Y );

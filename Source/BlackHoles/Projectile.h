@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
+
+class UProjectileMovementComponent;
+class USoundBase;
+
 UCLASS()
 class BLACKHOLES_API AProjectile : public AActor
 {
@@ -15,30 +19,34 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
-private:
-
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+
+	// COMPONENTS
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* ProjectileMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	class UProjectileMovementComponent* ProjectileMovementComp;
+	UProjectileMovementComponent* ProjectileMovementComp;
 
+	// MODIFIABLE MEMBERS
 
-	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult);
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	USoundBase* HitSound;
 
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	float Damage = 0.f;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	class USoundBase* HitSound;
+
+protected:
+
+	virtual void BeginPlay() override;
+
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult);
+	
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 };

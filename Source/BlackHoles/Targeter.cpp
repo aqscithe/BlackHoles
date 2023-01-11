@@ -49,10 +49,7 @@ UPhysicsHandleComponent* UTargeter::GetPhysicsHandle()
 void UTargeter::Target()
 {
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
-	if (PhysicsHandle == nullptr)
-	{
-		return;
-	}
+	if (!PhysicsHandle) return;
 
 	FHitResult Target;
 	bool HasTarget = GetTargetableInReach(Target);
@@ -65,27 +62,14 @@ void UTargeter::Target()
 		UPrimitiveComponent* TargetedComponent = Target.GetComponent();
 
 		TArray<FName>& TargetedActorTags = TargetedActor->Tags;
-		UE_LOG(LogTemp, Display, TEXT("Number of tags on grabbed actor: %d"), TargetedActorTags.Num());
 
 		if (!TargetedActorTags.Contains("Targeted"))
 		{
 			if (OwnerPlayerChar)
 				OwnerPlayerChar->SetImmobilized(true);
 
-			TargetedComponent->WakeAllRigidBodies();
-			PhysicsHandle->GrabComponentAtLocationWithRotation(
-				TargetedComponent,
-				NAME_None,
-				Target.ImpactPoint,
-				GetComponentRotation()
-			);
-
-			// Add shake scene component to actor
-			TargetedActor->AddComponentByClass(ShakeClass, false, FTransform::Identity, false);
-
-			
-			TargetedActorTags.Add("Targeted");
-			UE_LOG(LogTemp, Display, TEXT("Number of tags POST TARGET: %d"), TargetedActorTags.Num());
+			if (ShakeTarget(TargetedComponent, PhysicsHandle, Target))
+				TargetedActorTags.Add("Targeted");
 		}
 		else
 		{
@@ -94,8 +78,23 @@ void UTargeter::Target()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Display, TEXT("NO HIT"));
+		UE_LOG(LogTemp, Display, TEXT("No Target In Reach."));
 	}
+}
+
+bool UTargeter::ShakeTarget(UPrimitiveComponent* TargetedComponent, UPhysicsHandleComponent* PhysicsHandle, FHitResult& Target)
+{
+	if (!TargetedActor->AddComponentByClass(ShakeClass, false, FTransform::Identity, false)) return false;
+	
+	TargetedComponent->WakeAllRigidBodies();
+	PhysicsHandle->GrabComponentAtLocationWithRotation(
+		TargetedComponent,
+		NAME_None,
+		Target.ImpactPoint,
+		GetComponentRotation()
+	);
+	
+	return true;
 }
 
 bool UTargeter::GetTargetableInReach(FHitResult& OutHit) const
@@ -103,10 +102,7 @@ bool UTargeter::GetTargetableInReach(FHitResult& OutHit) const
 	FVector LineStart = GetComponentLocation();
 	FVector LineEnd = LineStart + GetForwardVector() * MaxTargetDist;
 
-	DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Cyan);
 	DrawDebugSphere(GetWorld(), LineEnd, 10, 20, FColor::Green, false, 5.0F);
-
-	FCollisionShape Sphere = FCollisionShape::MakeSphere(TargetRadius);
 
 	return GetWorld()->SweepSingleByChannel(
 		OutHit,
@@ -114,7 +110,7 @@ bool UTargeter::GetTargetableInReach(FHitResult& OutHit) const
 		LineEnd,
 		FQuat::Identity,
 		ECC_GameTraceChannel1,
-		Sphere
+		FCollisionShape::MakeSphere(TargetRadius)
 	);
 }
 
@@ -123,21 +119,15 @@ void UTargeter::Release(bool bBlackHoleIsTriggered)
 {
 	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
 
-	UE_LOG(LogTemp, Display, TEXT("Inside Release Function"));
-
 	if (PhysicsHandle && PhysicsHandle->GetGrabbedComponent())
 	{
-		UE_LOG(LogTemp, Display, TEXT("Release Function if statement"));
 		AFirstPersonCharacter* OwnerPlayerChar = Cast<AFirstPersonCharacter>(GetOwner());
+		UPrimitiveComponent* GrabbedComponent = PhysicsHandle->GetGrabbedComponent();
 
-		if (OwnerPlayerChar)
+		if (OwnerPlayerChar && GrabbedComponent)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Release Function owner player char check"));
 			OwnerPlayerChar->SetImmobilized(false);
-		}
 
-		if (UPrimitiveComponent* GrabbedComponent = PhysicsHandle->GetGrabbedComponent())
-		{
 			if (bBlackHoleIsTriggered)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Spawning BH Sphere"));
@@ -147,10 +137,8 @@ void UTargeter::Release(bool bBlackHoleIsTriggered)
 					GrabbedComponent->GetCenterOfMass(),
 					GrabbedComponent->GetOwner()->GetActorRotation()
 				);
-
 			}
-			
-
+		
 			GrabbedComponent->WakeAllRigidBodies();
 
 			if (!GrabbedComponent->GetOwner()) return;
@@ -163,13 +151,10 @@ void UTargeter::Release(bool bBlackHoleIsTriggered)
 			TargetedActor = nullptr;
 			UE_LOG(LogTemp, Display, TEXT("Released Component"));
 		}
-
-			
-
 	}
 	else
 	{
-		UE_LOG(LogTemp, Display, TEXT("Nothing Released"));
+		UE_LOG(LogTemp, Display, TEXT("No PhysicsHandle or No Grabbed Component to Release"));
 	}
 }
 

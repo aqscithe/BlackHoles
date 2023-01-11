@@ -39,14 +39,14 @@ private:
 	float HoldDistance = 200.f;
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void Target();
+
+	bool ShakeTarget(UPrimitiveComponent* TargetedComponent, UPhysicsHandleComponent* PhysicsHandle, FHitResult& Target);
 
 	void Release(bool bBlackHoleIsTriggered = false);
 
